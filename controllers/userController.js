@@ -16,8 +16,18 @@ export const registerUser = async (req, res) => {
     if (existingUser) {
       return res.status(400).send({ error: 'Email already in use' });
     }
-    // Proceed with creating a new user
+
+    // Create a new user
     const user = new User(req.body);
+
+    // Ensure unique shortId
+    let shortIdExists = false;
+    do {
+      user.shortId = User.generateShortId(10); // Assuming generateShortId is a static method on the User model
+      const shortIdUser = await User.findOne({ shortId: user.shortId });
+      shortIdExists = !!shortIdUser;
+    } while (shortIdExists);
+
     await user.save();
     res.status(201).send(User.createUserDTO(user));
   } catch (error) {
