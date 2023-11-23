@@ -1,6 +1,6 @@
 import express from 'express';
 import { getHelloMessage } from '../controllers/helloController.js';
-import passport from '../passport.js';
+import passport from '../config/passport.js';
 
 const router = express.Router();
 

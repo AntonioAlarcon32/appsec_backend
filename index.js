@@ -3,8 +3,8 @@ import express from 'express';
 import helloRoutes from "./routes/helloRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
-import './database.js'
-import passport from './passport.js';
+import './config/database.js'
+import passport from './config/passport.js';
 
 const app = express();
 dotenv.config();

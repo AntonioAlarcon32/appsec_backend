@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto'
-import { encryptUserKey, decryptUserKey } from '../cipherUtils.js';
+import { encryptUserKey } from '../cipherUtils.js';
 
 const userSchema = new mongoose.Schema({
   shortId: {

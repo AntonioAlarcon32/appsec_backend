@@ -1,5 +1,4 @@
 import User from '../models/userModel.js';
-import isEmail from 'validator/lib/isEmail.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import RefreshToken from '../models/refreshTokenModel.js';

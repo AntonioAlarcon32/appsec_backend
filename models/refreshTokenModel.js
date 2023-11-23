@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto'
 
 const refreshTokenSchema = new mongoose.Schema({
     payloadDgst: String,

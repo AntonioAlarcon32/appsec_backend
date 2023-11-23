@@ -1,4 +1,4 @@
-import passport from "../passport.js";
+import passport from "../config/passport.js";
 
 export const getHelloMessage = (req, res) => {
 
