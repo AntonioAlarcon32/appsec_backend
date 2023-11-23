@@ -21,10 +21,12 @@ export const login = async (req, res) => {
             return res.status(401).send('Invalid email or password');
         }
 
+        const expirationTime = Math.floor(Date.now() / 1000) + 60;
         const jwtPayload = {
             iss: 'FileCrypt', // Issuer (your application)
             sub: user.shortId, // Subject (user's short ID)
             iat: Math.floor(Date.now() / 1000), // Issued At (current timestamp in seconds)
+            exp: expirationTime // Expiration time (current timestamp + 900 seconds)
         };
 
         // Generate JWT token with the payload and your secret key

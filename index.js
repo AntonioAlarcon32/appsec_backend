@@ -4,12 +4,15 @@ import helloRoutes from "./routes/helloRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import './database.js'
+import passport from './passport.js';
 
 const app = express();
 dotenv.config();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+app.use(passport.initialize({ authInfo: true }));
 
 //Routes definition
 app.use('/', helloRoutes);

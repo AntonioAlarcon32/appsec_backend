@@ -1,4 +1,9 @@
+import passport from "../passport.js";
+
 export const getHelloMessage = (req, res) => {
-    res.send('Hello from the controller!');
-  };
+
+  const test = req.authInfo;
+
+  res.json({ message: 'Authenticated user', user: req.user });
+};
   
