@@ -6,7 +6,7 @@ import RefreshToken from '../models/refreshTokenModel.js';
 const dummyPasswordHash = bcrypt.hashSync('dummyPassword', 10);
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_REFRESH_SECRET= process.env.JWT_REFRESH_SECRET
-const JWT_EXPIRATION_TIME = 600; // 60 seconds
+const JWT_EXPIRATION_TIME = 600; // 600 seconds
 
 export const login = async (req, res) => {
 
