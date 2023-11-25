@@ -9,8 +9,8 @@
 - [X]  Implement register function
 - [X]  Implement get files function
 - [X]  Implement upload files function
+- [x]  Implement cipher for files
 - [ ]  Implement use of JWT for session (Passport)
-- [ ]  Implement cipher for files
 - [ ]  Implement access control
 - [ ]  Implement OAuth with Passport
 
