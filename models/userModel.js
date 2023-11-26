@@ -14,24 +14,16 @@ const userSchema = new mongoose.Schema({
   password: String,
   encryptionKey: String,
   keyIv: String,
-  authTag: String
-});
-
-
-userSchema.pre('save', async function(next) {
-  if (this.isNew) {
-    const hexKey = crypto.randomBytes(32).toString('hex');
-    const encryptedKey = encryptUserKey(hexKey);
-    this.encryptionKey = encryptedKey.encryptedData;
-    this.keyIv = encryptedKey.iv;
-    this.authTag = encryptedKey.authTag;
+  authTag: String,
+  googleId: String,
+  signupMethod: {
+    type: String,
+    enum: ['local', 'google'],
+    required: true
   }
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
-userSchema.statics.generateShortId = function (length) {
+const generateShortId = function (length) {
   const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -48,6 +40,30 @@ userSchema.statics.createUserDTO = function(user) {
     email: user.email
   };
 };
+
+userSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    const hexKey = crypto.randomBytes(32).toString('hex');
+    const encryptedKey = encryptUserKey(hexKey);
+    this.encryptionKey = encryptedKey.encryptedData;
+    this.keyIv = encryptedKey.iv;
+    this.authTag = encryptedKey.authTag;
+    let shortIdExists = false;
+    do {
+      const generatedShortId = generateShortId(10);
+      const shortIdUser = await this.constructor.findOne({ shortId: generatedShortId });
+      if (!shortIdUser) {
+        this.shortId = generatedShortId;
+        shortIdExists = false;
+      } else {
+        shortIdExists = true;
+      }
+    } while (shortIdExists);
+  }
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 export default mongoose.model('User', userSchema);
 
