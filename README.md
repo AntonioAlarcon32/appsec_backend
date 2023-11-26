@@ -10,8 +10,6 @@
 - [X]  Implement get files function
 - [X]  Implement upload files function
 - [x]  Implement cipher for files
-- [ ]  Implement use of JWT for session (Passport)
-- [ ]  Implement access control
-- [ ]  Implement OAuth with Passport
-
-TBD…
+- [x]  Implement use of JWT for session (Passport)
+- [x]  Implement access control
+- [x]  Implement OAuth with Passport
