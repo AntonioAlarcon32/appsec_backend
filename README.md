@@ -11,5 +11,5 @@
 - [X]  Implement upload files function
 - [x]  Implement cipher for files
 - [x]  Implement use of JWT for session (Passport)
-- [x]  Implement access control
+- []  Implement access control
 - [x]  Implement OAuth with Passport
