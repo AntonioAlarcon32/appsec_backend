@@ -4,6 +4,6 @@ import passport from '../config/passport.js';
 
 const router = express.Router();
 
-router.get('/', passport.authenticate('jwt', { session: false }), getHelloMessage);
+router.get('/hello', passport.authenticate('jwt', { session: false }), getHelloMessage);
 
 export default router;

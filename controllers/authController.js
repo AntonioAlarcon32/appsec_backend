@@ -2,11 +2,12 @@ import User from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import RefreshToken from '../models/refreshTokenModel.js';
+import SingleUseToken from '../models/singleUseTokenModel.js';
 
 const dummyPasswordHash = bcrypt.hashSync('dummyPassword', 10);
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_REFRESH_SECRET= process.env.JWT_REFRESH_SECRET
-const JWT_EXPIRATION_TIME = 600; // 600 seconds
+const JWT_EXPIRATION_TIME = 30; // 600 seconds
 
 export const login = async (req, res) => {
 
@@ -48,7 +49,8 @@ export const login = async (req, res) => {
         const refreshToken = jwt.sign(refreshTokenPayload, JWT_REFRESH_SECRET);
         const newToken = new RefreshToken({ payloadDgst: refreshToken , shortId: user.shortId});
         await newToken.save();
-        res.status(200).json({ token: token, refreshToken: refreshToken });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
+        res.status(200).json({ token: token });
     } catch (error) {
         res.status(500).send('Server error');
     }
@@ -56,7 +58,8 @@ export const login = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-    const receivedToken = req.body.refreshToken;
+
+    const receivedToken = req.cookies.refreshToken;
     if (!receivedToken) {
         return res.status(401).send('No token provided');
     }
@@ -103,29 +106,52 @@ export const googleLogin = async (req, res) => {
 
     try {
         const user = req.user;
-        // Generate tokens here...
-        const expirationTime = Math.floor(Date.now() / 1000) + JWT_EXPIRATION_TIME;
-        const jwtPayload = {
-            iss: 'FileCrypt', // Issuer (your application)
-            sub: user.shortId, // Subject (user's short ID)
-            iat: Math.floor(Date.now() / 1000), // Issued At (current timestamp in seconds)
-            exp: expirationTime // Expiration time (current timestamp + 900 seconds)
-        };
-        const refreshTokenPayload = {
-            iss: 'FileCrypt', // Issuer (your application)
-            sub: user.shortId,
-            iat: Math.floor(Date.now() / 1000),
-            type: 'refresh'
-        };
-
-        const token = jwt.sign(jwtPayload, JWT_SECRET);
-        const refreshToken = jwt.sign(refreshTokenPayload, JWT_REFRESH_SECRET);
-        const newToken = new RefreshToken({ payloadDgst: refreshToken , shortId: user.shortId});
+        //Generate single use token
+        const newToken = new SingleUseToken({ shortId: user.shortId });
         await newToken.save();
-        res.status(200).json({ token: token, refreshToken: refreshToken });
-
+        res.redirect('http://localhost:3000/menu?token=' + newToken.token);
       } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
       }
+}
 
+export const exchangeSingleUseToken = async (req, res) => {
+    try {
+        const record = await SingleUseToken.findOne({ token: req.body.token });
+
+        if (!record) {
+            return res.status(404).json({ message: 'Token not found' });
+            
+        }
+    
+        if (record.expiresAt < new Date()) {
+            return res.status(401).json({ message: 'Token expired' });
+            
+        }
+
+        const expirationTime = Math.floor(Date.now() / 1000) + JWT_EXPIRATION_TIME;
+        const jwtPayload = {
+                iss: 'FileCrypt', // Issuer (your application)
+                sub: record.shortId, // Subject (user's short ID)
+                iat: Math.floor(Date.now() / 1000), // Issued At (current timestamp in seconds)
+                exp: expirationTime // Expiration time (current timestamp + 900 seconds)
+        };
+        const refreshTokenPayload = {
+                iss: 'FileCrypt', // Issuer (your application)
+                sub: record.shortId,
+                iat: Math.floor(Date.now() / 1000),
+                type: 'refresh'
+        };
+
+        // Mark the token as used
+        await SingleUseToken.deleteOne(record);
+        const token = jwt.sign(jwtPayload, JWT_SECRET);
+        const refreshToken = jwt.sign(refreshTokenPayload, JWT_REFRESH_SECRET);
+        const newToken = new RefreshToken({ payloadDgst: refreshToken , shortId: record.shortId});
+        await newToken.save();
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
+        return res.status(200).json({ token: token });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
 }

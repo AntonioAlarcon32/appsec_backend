@@ -6,17 +6,27 @@ import authRoutes from "./routes/authRoutes.js"
 import fileRoutes from "./routes/fileRoutes.js"
 import './config/database.js'
 import passport from './config/passport.js';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 const app = express();
 dotenv.config();
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+const corsOptions = {
+  origin: true, // replace with your frontend URL
+  credentials: true, // to support cookies
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+};
 
+app.use(cors(corsOptions));
+
+//Middlewares
+app.use(express.json());
+app.use(cookieParser())
 app.use(passport.initialize({ authInfo: true }));
 
 //Routes definition
-app.use('/', helloRoutes);
+app.use('/hello', helloRoutes);
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/files', fileRoutes);
