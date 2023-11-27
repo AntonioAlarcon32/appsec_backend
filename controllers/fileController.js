@@ -125,10 +125,15 @@ export const shareFile = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Check if the file is already shared with the user
+    if (file.accessList.includes(userToShareWith.shortId)) {
+      return res.status(409).json({ message: 'File is already shared with this user.' });
+    }
+
     let decryptedData;
     let sharedKey;
 
-    // Check if the file has already been shared
+    // Check if the file has already been shared with someone else
     if (file.sharedKey && file.sharedKeyIv && file.sharedKeyAuthTag) {
       // Decrypt the shared key using the master key
       sharedKey = decryptKey(file.sharedKey, file.sharedKeyIv, file.sharedKeyAuthTag);
@@ -168,6 +173,7 @@ export const shareFile = async (req, res) => {
   }
 };
 
+
 export const revokeFileAccess = async (req, res) => {
   try {
     // Find the file
@@ -180,6 +186,11 @@ export const revokeFileAccess = async (req, res) => {
     const userToRevoke = await User.findOne({ email: req.body.email });
     if (!userToRevoke) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the user is in the file's access list
+    if (!file.accessList.includes(userToRevoke.shortId)) {
+      return res.status(404).json({ error: 'User does not have access to this file' });
     }
 
     // Check if the user to revoke is not the file's original uploader
@@ -197,6 +208,7 @@ export const revokeFileAccess = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 
