@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto'
-import { encryptUserKey } from '../cipherUtils.js';
+import { encryptKey } from '../cipherUtils.js';
 
 const userSchema = new mongoose.Schema({
   shortId: {
@@ -44,7 +44,7 @@ userSchema.statics.createUserDTO = function(user) {
 userSchema.pre('save', async function(next) {
   if (this.isNew) {
     const hexKey = crypto.randomBytes(32).toString('hex');
-    const encryptedKey = encryptUserKey(hexKey);
+    const encryptedKey = encryptKey(hexKey);
     this.encryptionKey = encryptedKey.encryptedData;
     this.keyIv = encryptedKey.iv;
     this.authTag = encryptedKey.authTag;

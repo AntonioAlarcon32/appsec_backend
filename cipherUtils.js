@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 
-function encryptUserKey(userKey) {
+function encryptKey(Key) {
   const masterKey = process.env.MASTER_KEY;
   const masterKeyBuffer = Buffer.from(masterKey, 'hex');
   const iv = crypto.randomBytes(16); // Initialization vector for AES
 
   const cipher = crypto.createCipheriv('aes-256-gcm', masterKeyBuffer, iv);
-  let encrypted = cipher.update(userKey);
+  let encrypted = cipher.update(Key);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
 
   return {
@@ -16,7 +16,7 @@ function encryptUserKey(userKey) {
   };
 }
 
-function decryptUserKey(encryptedData, iv, authTag) { 
+function decryptKey(encryptedData, iv, authTag) { 
   const masterKey = process.env.MASTER_KEY;
   const masterKeyBuffer = Buffer.from(masterKey, 'hex');
   const ivBuffer = Buffer.from(iv, 'hex');
@@ -31,9 +31,9 @@ function decryptUserKey(encryptedData, iv, authTag) {
   return decrypted.toString();
 }
 
-function encryptFile(buffer, decryptedUserKey) {
+function encryptFile(buffer, decryptedKey) {
   const iv = crypto.randomBytes(16); // Initialization vector for AES
-  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(decryptedUserKey, 'hex'), iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(decryptedKey, 'hex'), iv);
   let encrypted = cipher.update(buffer);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
 
@@ -44,8 +44,8 @@ function encryptFile(buffer, decryptedUserKey) {
   };
 }
 
-function decryptFile(encryptedData, decryptedUserKey, iv, authTag) {
-  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(decryptedUserKey, 'hex'), Buffer.from(iv, 'hex'));
+function decryptFile(encryptedData, decryptedKey, iv, authTag) {
+  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(decryptedKey, 'hex'), Buffer.from(iv, 'hex'));
   decipher.setAuthTag(Buffer.from(authTag, 'hex'));
   let decrypted = decipher.update(encryptedData);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -53,6 +53,6 @@ function decryptFile(encryptedData, decryptedUserKey, iv, authTag) {
   return decrypted;
 }
 
-export { encryptUserKey, decryptUserKey, encryptFile, decryptFile };
+export { encryptKey, decryptKey, encryptFile, decryptFile };
 
 
