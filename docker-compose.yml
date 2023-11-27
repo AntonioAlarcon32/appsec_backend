@@ -1,0 +1,12 @@
+version: '3'
+services:
+  backend:
+    image: appsec_backend:latest
+    ports:
+      - "3500:3500"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+  mongo:
+    image: mongo:latest
