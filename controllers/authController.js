@@ -7,7 +7,8 @@ import SingleUseToken from '../models/singleUseTokenModel.js';
 const dummyPasswordHash = bcrypt.hashSync('dummyPassword', 10);
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_REFRESH_SECRET= process.env.JWT_REFRESH_SECRET
-const JWT_EXPIRATION_TIME = 30; // 30 seconds
+const JWT_EXPIRATION_TIME = 900; // 30 seconds
+const FRONTEND_URL = process.env.FRONTEND_URL
 
 export const login = async (req, res) => {
 
@@ -109,7 +110,7 @@ export const googleLogin = async (req, res) => {
         //Generate single use token
         const newToken = new SingleUseToken({ shortId: user.shortId });
         await newToken.save();
-        res.redirect('http://localhost:3000/menu?token=' + newToken.token);
+        res.redirect(FRONTEND_URL + '/menu?token=' + newToken.token);
       } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
       }

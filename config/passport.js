@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const jwtSecret = process.env.JWT_SECRET; // Replace with your actual secret key
+const BACKEND_URL = process.env.BACKEND_URL;
 
 const opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -67,7 +68,7 @@ async function findOrCreateUser(profile) {
 passport.use(new GoogleStrategy({
   clientID: googleClientID,
   clientSecret: googleClientSecret,
-  callbackURL: "http://localhost:3500/auth/google/callback" // Adjust this as per your setup
+  callbackURL: BACKEND_URL + "/auth/google/callback" // Adjust this as per your setup
 },
 async (accessToken, refreshToken, profile, done) => {
   try {
