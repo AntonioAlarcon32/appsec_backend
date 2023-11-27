@@ -1,18 +1,59 @@
 version: '3'
 services:
-  frontend:
-    image: appsec_frontend:latest
+
+  traefik:
+    container_name: traefik
+    volumes:
+      - 'traefik:/etc/traefik'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    image: 'traefik:v2.10'
     ports:
-      - "3000:80"
+      - 80:80
+      - 443:443
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.hsts.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.hsts.headers.stsPreload=true"
+  frontend:
+    image: appsec-frontend:latest
     depends_on:
       - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`web.filecrypt.com`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.middlewares=hsts@docker"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
   backend:
-    image: appsec_backend:latest
-    ports:
-      - "3500:3500"
+    image: appsec-backend:latest
     depends_on:
       - mongo
     env_file:
-      - .env
+      - docker.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.filecrypt.com`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.services.backend.loadbalancer.server.port=3500"
+      - "traefik.http.routers.backend.middlewares=hsts@docker"
   mongo:
     image: mongo:latest
+    volumes:
+      - mongo:/data/db
+
+volumes:
+  mongo:
+  traefik:
+
