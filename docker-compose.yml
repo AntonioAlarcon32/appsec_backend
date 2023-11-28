@@ -4,7 +4,7 @@ services:
   traefik:
     container_name: traefik
     volumes:
-      - 'traefik:/etc/traefik'
+      - './traefik:/etc/traefik'
       - '/var/run/docker.sock:/var/run/docker.sock'
     image: 'traefik:v2.10'
     ports:
@@ -13,6 +13,7 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
+      - '--providers.file.filename=/etc/traefik/tls-certs.yml'
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
@@ -55,5 +56,4 @@ services:
 
 volumes:
   mongo:
-  traefik:
 

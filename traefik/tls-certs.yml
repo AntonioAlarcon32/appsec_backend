@@ -1,0 +1,7 @@
+
+tls:
+  certificates:
+    - certFile: /etc/traefik/certs/api.filecrypt.com.cert
+      keyFile:  /etc/traefik/certs/api.filecrypt.com.key
+    - certFile:  /etc/traefik/certs/web.filecrypt.com.cert
+      keyFile: /etc/traefik/certs/web.filecrypt.com.key
