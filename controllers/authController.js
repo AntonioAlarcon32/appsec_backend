@@ -156,3 +156,42 @@ export const exchangeSingleUseToken = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
+
+export const logout = async (req, res) => {
+    try {
+        const receivedToken = req.cookies.refreshToken;
+        const decodedToken = jwt.verify(receivedToken, JWT_REFRESH_SECRET);
+        const { sub, type } = decodedToken;
+        if (!receivedToken) {
+            return res.status(401).send('No token provided');
+        }
+        if (type !== 'refresh') {
+            return res.status(403).send('Invalid token');
+        }
+
+        const storedTokens = await RefreshToken.find({ shortId: sub });
+
+        if (storedTokens.length === 0) {
+            return res.status(403).send('Invalid token');
+        }
+
+        let tokenMatched = false;
+        for (const storedToken of storedTokens) {
+            const isMatch = await bcrypt.compare(receivedToken, storedToken.payloadDgst);
+            if (isMatch) {
+                await RefreshToken.deleteOne({ _id: storedToken._id });
+                tokenMatched = true;
+                break;
+            }
+        }
+
+        if (!tokenMatched) {
+            return res.status(403).send('Invalid token');
+        }
+
+        res.clearCookie('refreshToken');
+        return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
