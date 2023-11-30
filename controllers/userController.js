@@ -1,10 +1,9 @@
 import User from '../models/userModel.js';
 import isEmail from 'validator/lib/isEmail.js';
 
-
 export const registerUser = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password, confirmPassword } = req.body;
 
     // Validate the email format
     if (!isEmail(email)) {
@@ -15,6 +14,11 @@ export const registerUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).send({ error: 'Email already in use' });
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).send({ error: 'Passwords do not match' });
     }
 
     // Create a new user
